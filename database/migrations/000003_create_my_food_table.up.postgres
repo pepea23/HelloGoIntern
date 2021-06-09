@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS my_food(
-   "id" SERIAL,
-   "food_id" int,
+   "id" uuid,
+   "food_id" uuid,
+   "my" VARCHAR(255) NOT NULL,
    "created_at" TIMESTAMP DEFAULT NULL,
    "updated_at" TIMESTAMP DEFAULT NULL,
    "deleted_at" TIMESTAMP DEFAULT NULL,

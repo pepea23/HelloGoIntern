@@ -24,6 +24,7 @@ func NewFoodHandler(e *echo.Echo, middL *middleware.GoMiddleware, us food.FoodUs
 func (f *foodHandler) CreateFood(e echo.Context) error {
 	var params = e.Get("params")
 	var food = models.NewFoodWithParam(params.(map[string]interface{}))
+	food.GenarateUUID()
 
 	err := f.foodUs.CreateFood(food)
 	if err != nil {

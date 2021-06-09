@@ -49,7 +49,7 @@ func main() {
 	/* Inject Usecase */
 
 	userUs := _user_usecase.NewUserUsecase(userRepo)
-	foodUs := _food_usecase.NewFoodUsecase(foodRepo)
+	foodUs := _food_usecase.NewFoodUsecase(foodRepo, psqlDB)
 	/* Inject Handler */
 
 	_user_handler.NewUserHandler(e, middL, userUs)

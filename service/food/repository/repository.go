@@ -1,11 +1,13 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/HelloGoIntern/models"
 	"github.com/HelloGoIntern/orm"
 	"github.com/HelloGoIntern/service/food"
+	"github.com/gofrs/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -19,12 +21,8 @@ func NewPsqlFoodRepository(dbcon *sqlx.DB) food.FoodRepositorynterface {
 	}
 }
 
-func (f foodRepository) CreateFood(food *models.Food) error {
-	tx, err := f.db.Begin()
-	if err != nil {
-		return err
-	}
-	sql := `INSERT INTO food(name,quntity) VALUES($1::TEXT)`
+func (f foodRepository) CreateFood(food *models.Food, tx *sql.Tx) error {
+	sql := `INSERT INTO food(id,name) VALUES($1::UUID,$2::TEXT)`
 
 	stmt, err := tx.Prepare(sql)
 	if err != nil {
@@ -33,6 +31,7 @@ func (f foodRepository) CreateFood(food *models.Food) error {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(
+		food.Id,
 		food.Name,
 	)
 
@@ -40,7 +39,29 @@ func (f foodRepository) CreateFood(food *models.Food) error {
 		return err
 	}
 
-	return tx.Commit()
+	return nil
+}
+
+func (f foodRepository) CreateMyFood(myFood *models.MyFood, tx *sql.Tx) error {
+	sql := `INSERT INTO my_food(id,food_id,my) VALUES($1::UUID,$2::UUID,$3::TEXT)`
+
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		myFood.Id,
+		myFood.FoodId,
+		myFood.My,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (f foodRepository) FetchAllFoods() ([]*models.Food, error) {
@@ -55,8 +76,8 @@ func (f foodRepository) FetchAllFoods() ([]*models.Food, error) {
 	return f.orm(rows)
 }
 
-func (f foodRepository) FetchMyFoodFromFoodsId(id int64) (models.MyFoods, error) {
-	sql := fmt.Sprintf(`SELECT * FROM my_food WHERE food_id=%d`, id)
+func (f foodRepository) FetchMyFoodFromFoodsId(id *uuid.UUID) (models.MyFoods, error) {
+	sql := fmt.Sprintf(`SELECT * FROM my_food WHERE food_id='%s'`, id.String())
 
 	rows, err := f.db.Queryx(sql)
 	if err != nil {
