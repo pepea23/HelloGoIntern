@@ -43,6 +43,7 @@ func (f foodRepository) CreateFood(food *models.Food) error {
 }
 
 func (f foodRepository) FetchAllFoods() ([]*models.Food, error) {
+	//add comment
 	sql := `SELECT * FROM food`
 
 	rows, err := f.db.Queryx(sql)
