@@ -22,5 +22,19 @@ func (f foodUseCase) CreateFood(food *models.Food) error {
 
 func (f foodUseCase) FetchAllFoods() ([]*models.Food, error) {
 	foods, err := f.psqlFoodRepo.FetchAllFoods()
+	if err != nil {
+		return nil, err
+	}
+	if len(foods) == 0 {
+		return foods, err
+	}
+
+	for _, food := range foods {
+		myFoods, err := f.psqlFoodRepo.FetchMyFoodFromFoodsId(food.Id)
+		if err != nil {
+			return nil, err
+		}
+		food.MyFoods = myFoods
+	}
 	return foods, err
 }
