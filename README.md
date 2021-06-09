@@ -1,1 +1,1 @@
-# HelloGoIntern
+# go-clean-template
