@@ -10,6 +10,10 @@ import (
 
 	myMiddL "github.com/HelloGoIntern/middleware"
 
+	_my_bot_ "github.com/HelloGoIntern/service/bot"
+	_bot_handler "github.com/HelloGoIntern/service/bot/http"
+	_bot_usecase "github.com/HelloGoIntern/service/bot/usecase"
+
 	_food_handler "github.com/HelloGoIntern/service/food/http"
 	_food_repository "github.com/HelloGoIntern/service/food/repository"
 	_food_usecase "github.com/HelloGoIntern/service/food/usecase"
@@ -17,6 +21,7 @@ import (
 	_user_handler "github.com/HelloGoIntern/service/user/http"
 	_user_repository "github.com/HelloGoIntern/service/user/repository"
 	_user_usecase "github.com/HelloGoIntern/service/user/usecase"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -29,9 +34,24 @@ func sqlDB() *sqlx.DB {
 	return db
 }
 
-func main() {
-	psqlDB := sqlDB()
+func connectBot() *tgbotapi.BotAPI {
+	bot, err := tgbotapi.NewBotAPI(_conf.GetEnv("TOKEN_BOT", ""))
+	if err != nil {
+		log.Panic(err)
+	}
 
+	bot.Debug = true
+
+	log.Printf("Authorized on account %s", bot.Self.UserName)
+	return bot
+}
+
+func main() {
+	//set up bot and routine
+	bot := connectBot()
+	_my_bot_.RoutineBot(bot)
+
+	psqlDB := sqlDB()
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
@@ -48,10 +68,12 @@ func main() {
 	foodRepo := _food_repository.NewPsqlFoodRepository(psqlDB)
 	/* Inject Usecase */
 
+	botUs := _bot_usecase.NewBotAPIUsecase(bot)
 	userUs := _user_usecase.NewUserUsecase(userRepo)
 	foodUs := _food_usecase.NewFoodUsecase(foodRepo, psqlDB)
 	/* Inject Handler */
 
+	_bot_handler.NewBOTHandler(e, middL, botUs)
 	_user_handler.NewUserHandler(e, middL, userUs)
 	_food_handler.NewFoodHandler(e, middL, foodUs)
 
