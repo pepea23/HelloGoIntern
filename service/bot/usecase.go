@@ -1,3 +1,5 @@
 package bot
 
-type BOTUseCaseInterface interface{}
+type BOTUseCaseInterface interface {
+	GetSomeThing() (string, error)
+}

@@ -2,11 +2,12 @@ package bot
 
 import (
 	"log"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func RoutineBot(bot *tgbotapi.BotAPI) {
+func RoutineBot(bot *tgbotapi.BotAPI, handle BOTHandlerInterface) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -18,14 +19,17 @@ func RoutineBot(bot *tgbotapi.BotAPI) {
 				continue
 			}
 
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			text := update.Message.Text
+			switch text {
+			case "test":
+				handle.TestCallback(bot, update)
 
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			msg.ReplyToMessageID = update.Message.MessageID
+			case "abc":
+				handle.ABC(bot, update)
 
-			bot.Send(msg)
+			}
 
-			// time.Sleep(1000)
+			time.Sleep(2500)
 		}
 	}()
 }

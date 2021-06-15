@@ -49,7 +49,6 @@ func connectBot() *tgbotapi.BotAPI {
 func main() {
 	//set up bot and routine
 	bot := connectBot()
-	_my_bot_.RoutineBot(bot)
 
 	psqlDB := sqlDB()
 	e := echo.New()
@@ -68,15 +67,16 @@ func main() {
 	foodRepo := _food_repository.NewPsqlFoodRepository(psqlDB)
 	/* Inject Usecase */
 
-	botUs := _bot_usecase.NewBotAPIUsecase(bot)
-	userUs := _user_usecase.NewUserUsecase(userRepo)
 	foodUs := _food_usecase.NewFoodUsecase(foodRepo, psqlDB)
+	botUs := _bot_usecase.NewBotAPIUsecase(bot, foodUs)
+	userUs := _user_usecase.NewUserUsecase(userRepo)
 	/* Inject Handler */
 
-	_bot_handler.NewBOTHandler(e, middL, botUs)
+	handle := _bot_handler.NewBOTHandler(e, middL, botUs)
 	_user_handler.NewUserHandler(e, middL, userUs)
 	_food_handler.NewFoodHandler(e, middL, foodUs)
 
+	_my_bot_.RoutineBot(bot, handle)
 	port := ":" + _conf.GetEnv("PORT", "3000")
 	e.Logger.Fatal(e.Start(port))
 }
