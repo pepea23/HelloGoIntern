@@ -32,7 +32,7 @@ app.migration.create:
 	docker exec -it $(app_name) migrate create -ext $(db_driver) -dir database/migrations -seq create_$(table)_table
 
 app.migration.up:
-	docker exec -it $(app_name) migrate -database "$(db_url)" -path database/migrations up
+	docker exec -it app migrate -database "postgres://postgres:postgres@psql_db:5432/app_example_development?sslmode=disable" -path database/migrations up
 
 app.migration.fix:
 	docker exec -it $(app_name) migrate -database "$(db_url)" -path database/migrations force $(version)
