@@ -67,3 +67,42 @@ func (f foodUseCase) FetchAllFoods() ([]*models.Food, error) {
 	}
 	return foods, err
 }
+
+func (f foodUseCase) FetchFoodFromFoodsName(FoodName string) ([]*models.Food, error) {
+	foods, err := f.psqlFoodRepo.FetchFoodFromFoodsName(FoodName)
+	if err != nil {
+		return nil, err
+	}
+	if len(foods) == 0 {
+		return foods, err
+	}
+
+	
+	return foods, err
+}
+
+func (f foodUseCase) FetchFoodFromTypeOfFood(TypeOfFood string) ([]*models.Food, error) {
+	foods, err := f.psqlFoodRepo.FetchFoodFromTypeOfFood(TypeOfFood)
+	if err != nil {
+		return nil, err
+	}
+	if len(foods) == 0 {
+		return foods, err
+	}
+
+	
+	return foods, err
+}
+
+func (f foodUseCase) FetchFoodFromPrice(Price string) ([]*models.Food, error) {
+	foods, err := f.psqlFoodRepo.FetchFoodFromPrice(Price)
+	if err != nil {
+		return nil, err
+	}
+	if len(foods) == 0 {
+		return foods, err
+	}
+
+	
+	return foods, err
+}

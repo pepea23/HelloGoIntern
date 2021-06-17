@@ -3,6 +3,9 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"strings"
+	"sync"
 
 	"github.com/HelloGoIntern/models"
 	"github.com/HelloGoIntern/orm"
@@ -32,7 +35,7 @@ func (f foodRepository) CreateFood(food *models.Food, tx *sql.Tx) error {
 
 	_, err = stmt.Exec(
 		food.Id,
-		food.Name,
+		food.FoodName,
 	)
 
 	if err != nil {
@@ -86,6 +89,77 @@ func (f foodRepository) FetchMyFoodFromFoodsId(id *uuid.UUID) (models.MyFoods, e
 	defer rows.Close()
 
 	return f.ormMyFood(rows)
+}
+
+func (f foodRepository) FetchFoodFromFoodsName(FoodName string) ([]*models.Food, error) {
+	sql := fmt.Sprintf(`SELECT * FROM food WHERE food_name='%s'`, FoodName)
+
+	rows, err := f.db.Queryx(sql)
+	if err != nil {
+		return nil, err
+	}
+	
+	defer rows.Close()
+
+	return f.orm(rows)
+}
+
+func (f foodRepository) FetchFoodFromTypeOfFood(TypeOfFood string) ([]*models.Food, error) {
+	sql := fmt.Sprintf(`SELECT * FROM food WHERE type_of_food='%s'`, TypeOfFood)
+
+	rows, err := f.db.Queryx(sql)
+	if err != nil {
+		return nil, err
+	}
+	
+	defer rows.Close()
+
+	return f.orm(rows)
+}
+
+func (f foodRepository) FetchFoodFromPrice(Price string) ([]*models.Food, error) {
+	sql := fmt.Sprintf(`SELECT * FROM food WHERE price='%s'`, Price)
+
+	rows, err := f.db.Queryx(sql)
+	if err != nil {
+		return nil, err
+	}
+	
+	defer rows.Close()
+
+	return f.orm(rows)
+}
+
+
+func (f foodRepository) FetchFoodWithFilter(args *sync.Map) ([]*models.Food, error) {
+	var wheresomthing []string 
+	
+	if foodName, ok := args.Load("food_name"); ok { 
+		wheresomthing = append(wheresomthing, fmt.Sprintf(`food_name='%s'`, foodName))
+	}
+	if foodType, ok := args.Load("food_type"); ok { 
+		wheresomthing = append(wheresomthing, fmt.Sprintf(`type_of_food='%s'`, foodType))
+	}
+	if foodPrice, ok := args.Load("food_price"); ok { 
+		wheresomthing = append(wheresomthing, fmt.Sprintf(`price='%s'`, foodPrice))
+	}
+	var where string
+	if len(wheresomthing) != 0 {
+		where = "WHERE " + strings.Join(wheresomthing," AND ")
+	}
+ 	
+	sql := fmt.Sprintf(`SELECT * FROM food %s`, where)
+	log.Print(sql)
+
+	rows, err := f.db.Queryx(sql)
+	if err != nil {
+		return nil, err
+	}
+	
+	defer rows.Close()
+
+	return f.orm(rows)
+	
 }
 
 func (f foodRepository) ormMyFood(rows *sqlx.Rows) (models.MyFoods, error) {

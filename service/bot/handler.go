@@ -5,6 +5,9 @@ import (
 )
 
 type BOTHandlerInterface interface {
-	TestCallback(bot *tgbotapi.BotAPI, msg tgbotapi.Update)
+	GetAllMenu(bot *tgbotapi.BotAPI, msg tgbotapi.Update)
 	ABC(bot *tgbotapi.BotAPI, msg tgbotapi.Update)
+	RandomMenu(bot *tgbotapi.BotAPI, msg tgbotapi.Update)
+	Filter(bot *tgbotapi.BotAPI, msg tgbotapi.Update)
+	Test(bot *tgbotapi.BotAPI, msg tgbotapi.Update)
 }

@@ -13,6 +13,8 @@ func RoutineBot(bot *tgbotapi.BotAPI, handle BOTHandlerInterface) {
 
 	updates, err := bot.GetUpdatesChan(u)
 	log.Print(updates, err)
+
+	
 	go func() {
 		for update := range updates {
 			if update.Message == nil { // ignore any non-Message Updates
@@ -21,15 +23,24 @@ func RoutineBot(bot *tgbotapi.BotAPI, handle BOTHandlerInterface) {
 
 			text := update.Message.Text
 			switch text {
-			case "test":
-				handle.TestCallback(bot, update)
-
-			case "abc":
+			case "อาหารทั้งหมด":
+				handle.GetAllMenu(bot, update)
+				
+			case "aaa":
 				handle.ABC(bot, update)
 
+			case "สุ่มอาหาร":
+				handle.RandomMenu(bot, update)
+
+			case "!ค้นหาอาหารด้วยชื่อ":
+				handle.Test(bot, update)
+
+			default:
+				handle.Filter(bot, update)
 			}
 
-			time.Sleep(2500)
+
+			time.Sleep(3000)
 		}
 	}()
 }

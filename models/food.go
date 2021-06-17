@@ -10,7 +10,9 @@ const FK_FIELD_MY_FOODS = "MyFoods"
 type Food struct {
 	TableName struct{}               `json:"-" db:"food"`
 	Id        *uuid.UUID             `json:"id" db:"id" type:"uuid"`
-	Name      string                 `json:"name" db:"name" type:"string"`
+	FoodName   string                `json:"food_name" db:"food_name" type:"string"`
+	TypeOfFood string				 `json:"type_of_food" db:"type_of_food" type:"string"`
+	Price      string 				 `json:"price" db:"price" type:"string"`
 	CreatedAt *helperModel.Timestamp `json:"created_at" db:"created_at" type:"timestamp"`
 	UpdatedAt *helperModel.Timestamp `json:"updated_at" db:"updated_at" type:"timestamp"`
 	DeletedAt *helperModel.Timestamp `json:"deleted_at" db:"deleted_at" type:"timestamp"`
@@ -27,7 +29,7 @@ func NewFoodWithParam(params map[string]interface{}) *Food {
 	food := new(Food)
 
 	if v, ok := params["name"]; ok {
-		food.Name = v.(string)
+		food.FoodName = v.(string)
 	}
 
 	if v, ok := params["my_foods"]; ok {

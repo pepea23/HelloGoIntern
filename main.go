@@ -68,7 +68,7 @@ func main() {
 	/* Inject Usecase */
 
 	foodUs := _food_usecase.NewFoodUsecase(foodRepo, psqlDB)
-	botUs := _bot_usecase.NewBotAPIUsecase(bot, foodUs)
+	botUs := _bot_usecase.NewBotAPIUsecase(bot, foodRepo)
 	userUs := _user_usecase.NewUserUsecase(userRepo)
 	/* Inject Handler */
 
