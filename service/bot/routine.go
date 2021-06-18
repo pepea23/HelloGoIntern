@@ -2,6 +2,7 @@ package bot
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -23,22 +24,26 @@ func RoutineBot(bot *tgbotapi.BotAPI, handle BOTHandlerInterface) {
 
 			text := update.Message.Text
 			switch text {
-			case "อาหารทั้งหมด":
+			case "!รายการอาหาร":
 				handle.GetAllMenu(bot, update)
 				
-			case "aaa":
+			case "!คำสั่ง":
 				handle.ABC(bot, update)
 
-			case "สุ่มอาหาร":
+			case "!สุ่มอาหาร":
 				handle.RandomMenu(bot, update)
-
-			case "!ค้นหาอาหารด้วยชื่อ":
-				handle.Test(bot, update)
-
+			
 			default:
-				handle.Filter(bot, update)
+				
 			}
 
+			if strings.Contains(text, "!ค้นหาร้านอาหาร") {
+				handle.FilterRestaurant(bot, update)
+			}
+			
+			if strings.Contains(text, "!ค้นหาอาหาร") {
+				handle.FilterFood(bot, update)
+			}
 
 			time.Sleep(3000)
 		}

@@ -10,6 +10,10 @@ import (
 
 	myMiddL "github.com/HelloGoIntern/middleware"
 
+	_restaurant_handler "github.com/HelloGoIntern/service/restaurant/http"
+	_restaurant_repository "github.com/HelloGoIntern/service/restaurant/repository"
+	_restaurant_usecase "github.com/HelloGoIntern/service/restaurant/usecase"
+
 	_my_bot_ "github.com/HelloGoIntern/service/bot"
 	_bot_handler "github.com/HelloGoIntern/service/bot/http"
 	_bot_usecase "github.com/HelloGoIntern/service/bot/usecase"
@@ -65,16 +69,19 @@ func main() {
 
 	userRepo := _user_repository.NewPsqlUserRepository(psqlDB)
 	foodRepo := _food_repository.NewPsqlFoodRepository(psqlDB)
+	restaurantRepo := _restaurant_repository.NewPsqlRestaurantRepository(psqlDB)
 	/* Inject Usecase */
 
 	foodUs := _food_usecase.NewFoodUsecase(foodRepo, psqlDB)
-	botUs := _bot_usecase.NewBotAPIUsecase(bot, foodRepo)
+	botUs := _bot_usecase.NewBotAPIUsecase(bot, foodRepo, restaurantRepo)
 	userUs := _user_usecase.NewUserUsecase(userRepo)
+	restaurantUs :=  _restaurant_usecase.NewRestaurantUsecase(restaurantRepo, psqlDB)
 	/* Inject Handler */
 
 	handle := _bot_handler.NewBOTHandler(e, middL, botUs)
 	_user_handler.NewUserHandler(e, middL, userUs)
 	_food_handler.NewFoodHandler(e, middL, foodUs)
+	_restaurant_handler.NewRestaurantHandler(e, middL, restaurantUs)
 
 	_my_bot_.RoutineBot(bot, handle)
 	port := ":" + _conf.GetEnv("PORT", "3000")

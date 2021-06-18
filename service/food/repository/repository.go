@@ -133,17 +133,55 @@ func (f foodRepository) FetchFoodFromPrice(Price string) ([]*models.Food, error)
 
 func (f foodRepository) FetchFoodWithFilter(args *sync.Map) ([]*models.Food, error) {
 	var wheresomthing []string 
-	
+
+	if getOne, ok := args.Load("get_one"); ok { 
+		
+		foodP, errP := f.FetchFoodFromPrice(fmt.Sprintf(`%s`, getOne))
+		foodN, errN := f.FetchFoodFromFoodsName(fmt.Sprintf(`%s`, getOne)) 
+		foodT, errT := f.FetchFoodFromTypeOfFood(fmt.Sprintf(`%s`, getOne))
+		if errT != nil {
+			return nil, errT
+		}
+		if errP != nil {
+			return nil, errP
+		}
+		if errN != nil {
+			return nil, errN
+		}
+		if len(foodP) | len(foodN) | len(foodT) == 0 {
+			return nil, nil
+		}
+		if len(foodP) != 0 {
+			
+			wheresomthing = append(wheresomthing, fmt.Sprintf(`price='%s'`, foodP[0].Price))
+		log.Print(wheresomthing)
+		}
+		if len(foodN) != 0 {
+			wheresomthing = append(wheresomthing, fmt.Sprintf(`food_name='%s'`, foodN[0].FoodName))
+		log.Print(wheresomthing)
+		}
+		if len(foodT) != 0 {
+			wheresomthing = append(wheresomthing, fmt.Sprintf(`type_of_food='%s'`, foodT[0].TypeOfFood))
+		log.Print(wheresomthing)
+		} 
+		
+		
+		
+	}
 	if foodName, ok := args.Load("food_name"); ok { 
 		wheresomthing = append(wheresomthing, fmt.Sprintf(`food_name='%s'`, foodName))
+		log.Print(wheresomthing)
 	}
 	if foodType, ok := args.Load("food_type"); ok { 
 		wheresomthing = append(wheresomthing, fmt.Sprintf(`type_of_food='%s'`, foodType))
+		log.Print(wheresomthing)
 	}
 	if foodPrice, ok := args.Load("food_price"); ok { 
 		wheresomthing = append(wheresomthing, fmt.Sprintf(`price='%s'`, foodPrice))
+		log.Print(wheresomthing)
 	}
 	var where string
+	log.Print(wheresomthing)
 	if len(wheresomthing) != 0 {
 		where = "WHERE " + strings.Join(wheresomthing," AND ")
 	}

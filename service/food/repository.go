@@ -17,4 +17,5 @@ type FoodRepositorynterface interface {
 	FetchFoodFromTypeOfFood(TypeOfFood string) ([]*models.Food, error)
 	FetchFoodFromPrice(Price string) ([]*models.Food, error)
 	FetchFoodWithFilter(args *sync.Map) ([]*models.Food, error)
+	
 }

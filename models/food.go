@@ -20,6 +20,8 @@ type Food struct {
 	MyFoods MyFoods `json:"my_foods" db:"-" fk:"relation:many,fk_field1:Id,fk_field2:food_id"`
 }
 
+type Foods []*Food
+
 func (f *Food) GenarateUUID() {
 	uuid, _ := uuid.NewGen().NewV4()
 	f.Id = &uuid
