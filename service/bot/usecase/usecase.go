@@ -47,7 +47,7 @@ func (b botAPIUsercase) GetAllFood() (string, error) {
 		s = append(s,"|                               อาหารทั้งหมด   \n —————————————————————")
 	for i := 0; i < len(food); i++ {
 		
-		s = append(s,"|  " +food[i].FoodName )
+		s = append(s,"|  " +food[i].FoodName + " " + food[i].Price + " บาท" + "             ")
 		log.Print(s)
 	}
 	stringArray := s
@@ -90,7 +90,7 @@ func (b botAPIUsercase) FilterFoods(args *sync.Map) (string, error) {
 	ar = append(ar,"|                               รายการอาหารที่ค้นหาเจอ   \n —————————————————————")
 	for i := 0; i < len(foods); i++ {
 	
-		ar = append(ar,"|  " + foods[i].FoodName )
+		ar = append(ar,"|  " +foods[i].FoodName + " " + foods[i].Price + " บาท" + "             ")
 		log.Print(ar)
 	}
 	stringArray := ar
