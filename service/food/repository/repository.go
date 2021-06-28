@@ -25,7 +25,7 @@ func NewPsqlFoodRepository(dbcon *sqlx.DB) food.FoodRepositorynterface {
 }
 
 func (f foodRepository) CreateFood(food *models.Food, tx *sql.Tx) error {
-	sql := `INSERT INTO food(id,name) VALUES($1::UUID,$2::TEXT)`
+	sql := `INSERT INTO food(id,food_name) VALUES($1::UUID,$2::TEXT)`
 
 	stmt, err := tx.Prepare(sql)
 	if err != nil {
@@ -36,28 +36,6 @@ func (f foodRepository) CreateFood(food *models.Food, tx *sql.Tx) error {
 	_, err = stmt.Exec(
 		food.Id,
 		food.FoodName,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (f foodRepository) CreateMyFood(myFood *models.MyFood, tx *sql.Tx) error {
-	sql := `INSERT INTO my_food(id,food_id,my) VALUES($1::UUID,$2::UUID,$3::TEXT)`
-
-	stmt, err := tx.Prepare(sql)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(
-		myFood.Id,
-		myFood.FoodId,
-		myFood.My,
 	)
 
 	if err != nil {
@@ -98,7 +76,7 @@ func (f foodRepository) FetchFoodFromFoodsName(FoodName string) ([]*models.Food,
 	if err != nil {
 		return nil, err
 	}
-	
+
 	defer rows.Close()
 
 	return f.orm(rows)
@@ -111,7 +89,7 @@ func (f foodRepository) FetchFoodFromTypeOfFood(TypeOfFood string) ([]*models.Fo
 	if err != nil {
 		return nil, err
 	}
-	
+
 	defer rows.Close()
 
 	return f.orm(rows)
@@ -124,20 +102,19 @@ func (f foodRepository) FetchFoodFromPrice(Price string) ([]*models.Food, error)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	defer rows.Close()
 
 	return f.orm(rows)
 }
 
-
 func (f foodRepository) FetchFoodWithFilter(args *sync.Map) ([]*models.Food, error) {
-	var wheresomthing []string 
+	var wheresomthing []string
 
-	if getOne, ok := args.Load("get_one"); ok { 
-		
+	if getOne, ok := args.Load("get_one"); ok {
+
 		foodP, errP := f.FetchFoodFromPrice(fmt.Sprintf(`%s`, getOne))
-		foodN, errN := f.FetchFoodFromFoodsName(fmt.Sprintf(`%s`, getOne)) 
+		foodN, errN := f.FetchFoodFromFoodsName(fmt.Sprintf(`%s`, getOne))
 		foodT, errT := f.FetchFoodFromTypeOfFood(fmt.Sprintf(`%s`, getOne))
 		if errT != nil {
 			return nil, errT
@@ -148,44 +125,42 @@ func (f foodRepository) FetchFoodWithFilter(args *sync.Map) ([]*models.Food, err
 		if errN != nil {
 			return nil, errN
 		}
-		if len(foodP) | len(foodN) | len(foodT) == 0 {
+		if len(foodP)|len(foodN)|len(foodT) == 0 {
 			return nil, nil
 		}
 		if len(foodP) != 0 {
-			
+
 			wheresomthing = append(wheresomthing, fmt.Sprintf(`price='%s'`, foodP[0].Price))
-		log.Print(wheresomthing)
+			log.Print(wheresomthing)
 		}
 		if len(foodN) != 0 {
 			wheresomthing = append(wheresomthing, fmt.Sprintf(`food_name='%s'`, foodN[0].FoodName))
-		log.Print(wheresomthing)
+			log.Print(wheresomthing)
 		}
 		if len(foodT) != 0 {
 			wheresomthing = append(wheresomthing, fmt.Sprintf(`type_of_food='%s'`, foodT[0].TypeOfFood))
-		log.Print(wheresomthing)
-		} 
-		
-		
-		
+			log.Print(wheresomthing)
+		}
+
 	}
-	if foodName, ok := args.Load("food_name"); ok { 
+	if foodName, ok := args.Load("food_name"); ok {
 		wheresomthing = append(wheresomthing, fmt.Sprintf(`food_name='%s'`, foodName))
 		log.Print(wheresomthing)
 	}
-	if foodType, ok := args.Load("food_type"); ok { 
+	if foodType, ok := args.Load("food_type"); ok {
 		wheresomthing = append(wheresomthing, fmt.Sprintf(`type_of_food='%s'`, foodType))
 		log.Print(wheresomthing)
 	}
-	if foodPrice, ok := args.Load("food_price"); ok { 
+	if foodPrice, ok := args.Load("food_price"); ok {
 		wheresomthing = append(wheresomthing, fmt.Sprintf(`price='%s'`, foodPrice))
 		log.Print(wheresomthing)
 	}
 	var where string
 	log.Print(wheresomthing)
 	if len(wheresomthing) != 0 {
-		where = "WHERE " + strings.Join(wheresomthing," AND ")
+		where = "WHERE " + strings.Join(wheresomthing, " AND ")
 	}
- 	
+
 	sql := fmt.Sprintf(`SELECT * FROM food %s`, where)
 	log.Print(sql)
 
@@ -193,11 +168,11 @@ func (f foodRepository) FetchFoodWithFilter(args *sync.Map) ([]*models.Food, err
 	if err != nil {
 		return nil, err
 	}
-	
+
 	defer rows.Close()
 
 	return f.orm(rows)
-	
+
 }
 
 func (f foodRepository) ormMyFood(rows *sqlx.Rows) (models.MyFoods, error) {

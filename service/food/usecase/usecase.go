@@ -1,11 +1,8 @@
 package usecase
 
 import (
-	"database/sql"
-
 	"github.com/HelloGoIntern/models"
 	"github.com/HelloGoIntern/service/food"
-	"github.com/gofrs/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -31,22 +28,7 @@ func (f foodUseCase) CreateFood(food *models.Food) error {
 		return err
 	}
 
-	if err = f.createMyFoodsWithFoodID(food.Id, food.MyFoods, tx); err != nil {
-		return err
-	}
-
 	return tx.Commit()
-}
-
-func (f foodUseCase) createMyFoodsWithFoodID(foodId *uuid.UUID, myFoods models.MyFoods, tx *sql.Tx) error {
-	for _, myFood := range myFoods {
-		myFood.FoodId = foodId
-		myFood.GenarateUUID()
-		if err := f.psqlFoodRepo.CreateMyFood(myFood, tx); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (f foodUseCase) FetchAllFoods() ([]*models.Food, error) {
@@ -58,13 +40,6 @@ func (f foodUseCase) FetchAllFoods() ([]*models.Food, error) {
 		return foods, err
 	}
 
-	for _, food := range foods {
-		myFoods, err := f.psqlFoodRepo.FetchMyFoodFromFoodsId(food.Id)
-		if err != nil {
-			return nil, err
-		}
-		food.MyFoods = myFoods
-	}
 	return foods, err
 }
 
@@ -77,7 +52,6 @@ func (f foodUseCase) FetchFoodFromFoodsName(FoodName string) ([]*models.Food, er
 		return foods, err
 	}
 
-	
 	return foods, err
 }
 
@@ -90,7 +64,6 @@ func (f foodUseCase) FetchFoodFromTypeOfFood(TypeOfFood string) ([]*models.Food,
 		return foods, err
 	}
 
-	
 	return foods, err
 }
 
@@ -103,6 +76,5 @@ func (f foodUseCase) FetchFoodFromPrice(Price string) ([]*models.Food, error) {
 		return foods, err
 	}
 
-	
 	return foods, err
 }
