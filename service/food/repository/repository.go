@@ -25,7 +25,7 @@ func NewPsqlFoodRepository(dbcon *sqlx.DB) food.FoodRepositorynterface {
 }
 
 func (f foodRepository) CreateFood(food *models.Food, tx *sql.Tx) error {
-	sql := `INSERT INTO food(id,food_name) VALUES($1::UUID,$2::TEXT)`
+	sql := `INSERT INTO food(id, food_name, type_of_food, price, created_at, updated_at, deleted_at) VALUES($1::UUID, $2::TEXT, $3::TEXT, $4::TEXT, $5::timestamp, $6::timestamp, $7::timestamp)`
 
 	stmt, err := tx.Prepare(sql)
 	if err != nil {
@@ -36,6 +36,11 @@ func (f foodRepository) CreateFood(food *models.Food, tx *sql.Tx) error {
 	_, err = stmt.Exec(
 		food.Id,
 		food.FoodName,
+		food.TypeOfFood,
+		food.Price,
+		food.CreatedAt,
+		food.UpdatedAt,
+		food.DeletedAt,
 	)
 
 	if err != nil {
@@ -173,6 +178,19 @@ func (f foodRepository) FetchFoodWithFilter(args *sync.Map) ([]*models.Food, err
 
 	return f.orm(rows)
 
+}
+
+func (f foodRepository) Deletefood(id uuid.UUID) error {
+	sql := fmt.Sprintf(`DELETE FROM food WHERE id = '%s'`, id)
+	log.Println(sql)
+	rows, err := f.db.Queryx(sql)
+	if err != nil {
+		return nil
+	}
+
+	defer rows.Close()
+	log.Print(rows)
+	return nil
 }
 
 func (f foodRepository) ormMyFood(rows *sqlx.Rows) (models.MyFoods, error) {

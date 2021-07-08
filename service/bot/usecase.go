@@ -3,6 +3,7 @@ package bot
 import "sync"
 
 type BOTUseCaseInterface interface {
+	//	CreateFood() (string,error)
 	GetSomeThing() (string, error)
 	GetAllFood() (string, error)
 	RandomFood() (string, error)

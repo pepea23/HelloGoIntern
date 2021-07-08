@@ -15,7 +15,6 @@ func RoutineBot(bot *tgbotapi.BotAPI, handle BOTHandlerInterface) {
 	updates, err := bot.GetUpdatesChan(u)
 	log.Print(updates, err)
 
-	
 	go func() {
 		for update := range updates {
 			if update.Message == nil { // ignore any non-Message Updates
@@ -26,21 +25,21 @@ func RoutineBot(bot *tgbotapi.BotAPI, handle BOTHandlerInterface) {
 			switch text {
 			case "!รายการอาหาร":
 				handle.GetAllMenu(bot, update)
-				
+
 			case "!คำสั่ง":
 				handle.ABC(bot, update)
 
 			case "!สุ่มอาหาร":
 				handle.RandomMenu(bot, update)
-			
+
 			default:
-				
+
 			}
 
 			if strings.Contains(text, "!ค้นหาร้านอาหาร") {
 				handle.FilterRestaurant(bot, update)
 			}
-			
+
 			if strings.Contains(text, "!ค้นหาอาหาร") {
 				handle.FilterFood(bot, update)
 			}

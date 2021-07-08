@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"strings"
@@ -13,7 +14,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-
 type restaurantRepository struct {
 	db *sqlx.DB
 }
@@ -22,6 +22,30 @@ func NewPsqlRestaurantRepository(dbcon *sqlx.DB) restaurant.RestaurantRepository
 	return &restaurantRepository{
 		db: dbcon,
 	}
+}
+
+func (r restaurantRepository) CreateRestaurant(restaurant *models.Restaurant, tx *sql.Tx) error {
+	sql := `INSERT INTO restaurant(id,restaurant_name,address,phone_number,open_close_time) VALUES($1::UUID,$2::TEXT,$3::TEXT,$4::TEXT,$5::TEXT)`
+
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		restaurant.Id,
+		restaurant.RestaurantName,
+		restaurant.Address,
+		restaurant.PhoneNumber,
+		restaurant.OpenCloseTime,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r restaurantRepository) FetchAllRestaurants() ([]*models.Restaurant, error) {
@@ -94,9 +118,8 @@ func (r restaurantRepository) FetchIdRestaurantsFromName(s string) ([]*models.Re
 	return r.orm(rows)
 }
 
- func (r restaurantRepository) FetchFoodInRestaurantWithFilter(args *sync.Map) ([]*models.Food, error) {
-	var wheresomthing []string 
-
+func (r restaurantRepository) FetchFoodInRestaurantWithFilter(args *sync.Map) ([]*models.Food, error) {
+	var wheresomthing []string
 
 	if restaurantName, ok := args.Load("restaurant_name"); ok {
 		idRestaurant, err := r.FetchIdRestaurantsFromName(fmt.Sprintf(`%s`, restaurantName))
@@ -104,46 +127,45 @@ func (r restaurantRepository) FetchIdRestaurantsFromName(s string) ([]*models.Re
 			return nil, err
 		}
 		foods, err := r.FetchFoodFromRestaurantsId(idRestaurant[0].Id)
-		if getOne, ok := args.Load("get_one"); ok { 
+		if getOne, ok := args.Load("get_one"); ok {
 			for i := 0; i < len(foods); i++ {
 				if foods[i].FoodName == getOne {
 					wheresomthing = append(wheresomthing, fmt.Sprintf(`food_name='%s'`, foods[i].FoodName))
 					log.Print(wheresomthing)
-				}	
+				}
 				if foods[i].TypeOfFood == getOne {
 					wheresomthing = append(wheresomthing, fmt.Sprintf(`type_of_food='%s'`, foods[i].TypeOfFood))
 					log.Print(wheresomthing)
-				}	
+				}
 				if foods[i].Price == getOne {
 					wheresomthing = append(wheresomthing, fmt.Sprintf(`price='%s'`, foods[i].Price))
 					log.Print(wheresomthing)
-				} 
-				
-			} 
-			
-		
+				}
+
+			}
+
 		}
 		for i := 0; i < len(foods); i++ {
-		if foodName, ok := args.Load("food_name"); ok { 
-			if foods[i].FoodName == foodName {
-				wheresomthing = append(wheresomthing, fmt.Sprintf(`food_name='%s'`, foodName))
-			log.Print(wheresomthing)
-			}	
+			if foodName, ok := args.Load("food_name"); ok {
+				if foods[i].FoodName == foodName {
+					wheresomthing = append(wheresomthing, fmt.Sprintf(`food_name='%s'`, foodName))
+					log.Print(wheresomthing)
+				}
+			}
+			if foodType, ok := args.Load("food_type"); ok {
+				wheresomthing = append(wheresomthing, fmt.Sprintf(`type_of_food='%s'`, foodType))
+				log.Print(wheresomthing)
+			}
+			if foodPrice, ok := args.Load("food_price"); ok {
+				wheresomthing = append(wheresomthing, fmt.Sprintf(`price='%s'`, foodPrice))
+				log.Print(wheresomthing)
+			}
 		}
-		if foodType, ok := args.Load("food_type"); ok { 
-			wheresomthing = append(wheresomthing, fmt.Sprintf(`type_of_food='%s'`, foodType))
-			log.Print(wheresomthing)
-		}
-		if foodPrice, ok := args.Load("food_price"); ok { 
-			wheresomthing = append(wheresomthing, fmt.Sprintf(`price='%s'`, foodPrice))
-			log.Print(wheresomthing)
-		}
-	}
 		var where string
 		log.Print(wheresomthing)
 		if len(wheresomthing) != 0 {
-			where = "WHERE " + strings.Join(wheresomthing," AND ")
-			
+			where = "WHERE " + strings.Join(wheresomthing, " AND ")
+
 		}
 
 		if where == "" {
@@ -151,22 +173,29 @@ func (r restaurantRepository) FetchIdRestaurantsFromName(s string) ([]*models.Re
 		}
 		sql := fmt.Sprintf(`SELECT * FROM food %s`, where)
 		log.Print(sql)
-	
+
 		rows, err := r.db.Queryx(sql)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		defer rows.Close()
 		return r.ormFood(rows)
-		
+
 	}
 
 	return nil, nil
-	
-} 
 
+}
+func (r restaurantRepository) DeleteRestaurant(id uuid.UUID) error {
+	sql := fmt.Sprintf(`DELETE FROM restaurant WHERE id = '%s'`, id)
+	log.Println(sql)
+	rows, err := r.db.Queryx(sql)
+	if err != nil {
+		return nil
+	}
 
-
-
-
+	defer rows.Close()
+	log.Print(rows)
+	return nil
+}

@@ -3,6 +3,7 @@ package usecase
 import (
 	"github.com/HelloGoIntern/models"
 	"github.com/HelloGoIntern/service/food"
+	"github.com/gofrs/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -77,4 +78,7 @@ func (f foodUseCase) FetchFoodFromPrice(Price string) ([]*models.Food, error) {
 	}
 
 	return foods, err
+}
+func (f foodUseCase) Deletefood(id uuid.UUID) error {
+	return f.psqlFoodRepo.Deletefood(id)
 }

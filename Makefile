@@ -4,23 +4,23 @@ expose=3000
 db_driver=postgres
 
 dev.serve:
-	docker-compose up $(app_name)
+	docker-compose up app
 
 dev.down:
 	docker-compose down 
 
 prod.build:
-	docker build ./ -t $(app_name)
+	docker build ./ -t app
 
 prod.run:
-	docker run --rm --name $(app_name) -p $(port):$(expose) -d $(app_name) 
+	docker run --rm --name app -p $(port):$(expose) -d app 
 
 prod.down:
-	docker stop $(app_name)
+	docker stop app
 
 prod.serve:
-	make prod.build app_name=$(app_name)
-	make prod.run app_name=$(app_name) port=$(port) expose=$(expose)
+	make prod.build app_name=app
+	make prod.run app_name=app port=$(port) expose=$(expose)
 
 install-migration:
 	docker exec -it app sh -c "wget https://github.com/golang-migrate/migrate/releases/download/v4.6.2/migrate.linux-amd64.tar.gz"

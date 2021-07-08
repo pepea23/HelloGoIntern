@@ -26,9 +26,14 @@ func (f *Food) GenarateUUID() {
 func NewFoodWithParam(params map[string]interface{}) *Food {
 	food := new(Food)
 
-	if v, ok := params["name"]; ok {
+	if v, ok := params["food_name"]; ok {
 		food.FoodName = v.(string)
 	}
-
+	if v, ok := params["type_of_food"]; ok {
+		food.TypeOfFood = v.(string)
+	}
+	if v, ok := params["price"]; ok {
+		food.Price = v.(string)
+	}
 	return food
 }

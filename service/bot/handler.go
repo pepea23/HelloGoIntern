@@ -10,5 +10,4 @@ type BOTHandlerInterface interface {
 	RandomMenu(bot *tgbotapi.BotAPI, msg tgbotapi.Update)
 	FilterFood(bot *tgbotapi.BotAPI, msg tgbotapi.Update)
 	FilterRestaurant(bot *tgbotapi.BotAPI, msg tgbotapi.Update)
-	
 }
